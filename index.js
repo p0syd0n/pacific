@@ -74,9 +74,20 @@ function add_user(username, password, public_key, private_key) {
 
 async function checkLogin(username, password) {
   const data = await get_data();
-  for (user_dict in data) {
-    //stopped here
+  const parsedData = JSON.parse(data);
+  for (let i = 0; i < parsedData.length; i++) {
+    const user_dict = parsedData[i];
+    if (user_dict.username === username) {
+      if (hash(password) === user_dict.password) {
+        return {
+          'username': username,
+          'public_key': decrypt(user_dict.public_key),
+          'private_key': decrypt(user_dict.private_key)
+        };
+      }
+    }
   }
+  return null; // Return null if the login credentials are not found
 }
 
 function hash(data) {
@@ -104,6 +115,15 @@ app.get('/', (req, res) => {
 
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
+  let verify = checkLogin(username, password)
+  if (verify != null) {
+    req.session.username = verify['username']
+    req.session.public_key = verify['public_key']
+    req.session.private_key = verify['private_key']
+    res.send(req.session)
+  } else {
+    res.sendStatus(401)
+  }
 });
 
 app.listen(3000, () => {
@@ -111,8 +131,8 @@ app.listen(3000, () => {
 });
 
 
-let data = await get_data();
-console.log(data);
+// let data = await get_data();
+// console.log(data);
 
-let response = await add_user('posydon', hash('admin'), 'pub_key', 'priv_key')
-console.log(response)
+//let response = await add_user('posydon', hash('admin'), encrypt('pub_key'), encrypt('priv_key'));
+//console.log(await checkLogin('posydon', 'admin'));
