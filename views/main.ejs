@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Admin Panel</title>
-  <link rel="icon" type="image/x-icon" href="/images/favicon.png">
+  <link rel="icon" type="image/x-icon" href="/images/icon_transparent.png">
 	<link rel="stylesheet" type="text/css" href="/css/main.css">
   <link rel="stylesheet" type="text/css" href="/css/encryption.css">
 </head>
@@ -57,38 +57,6 @@
       <div id="tab3" class="tabcontent">
         <h3>Server Logs</h3>
         <div id="log-content"></div>
-      </div>
-      <div id="tab4" class="tabcontent">
-        <form id="encryption-form">
-          <label for="key-select">Select encryption key:</label>
-          <select id="key-select">
-            <option value="public">public</option>
-          </select>
-          <br>
-          <label for="data-input">Enter data to encrypt:</label>
-          <input type="text" id="data-input">
-          <br>
-          <label for="init_vector">Enter initialization vector (passcode):</label>
-          <input type="text" id="init_vector">
-          <br>
-          <button type="submit">Encrypt data</button>
-        </form>
-      </div>
-      <div id="tab5" class="tabcontent">
-        <form id="decryption-form">
-          <label for="key-select-dec">Select decryption key:</label>
-          <select id="key-select-dec">
-            <option value="public">public</option>
-          </select>
-          <br>
-          <label for="data-input-dec">Enter data to decrypt:</label>
-          <input type="text" id="data-input-dec">
-          <br>
-          <label for="init_vector">Enter initialization vector (passcode):</label>
-          <input type="text" id="init_vector-dec">
-          <br>
-          <button type="submit">Decrypt data</button>
-        </form>
       </div>
       
 	<script src="/js/script.js"></script>
