@@ -32,7 +32,40 @@ app.use(
   })
 );
 
-function get_data() {
+// Encrypt data using the public key
+function encryptRSA(data, publicKey) {
+  return crypto.publicEncrypt(
+    {
+      key: publicKey,
+      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: 'sha256',
+    },
+    Buffer.from(data, 'utf-8')
+  ).toString('base64');
+}
+
+// Decrypt data using the private key
+function decryptRSA(encryptedData, privateKey) {
+  return crypto.privateDecrypt(
+    {
+      key: privateKey,
+      padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+      oaepHash: 'sha256',
+    },
+    Buffer.from(encryptedData, 'base64')
+  ).toString('utf-8');
+}
+
+async function generate_keys(bits=2048) {
+  const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
+    modulusLength: bits,
+  });
+  const publicKeyStr = publicKey.export({ type: 'spki', format: 'pem' });
+  const privateKeyStr = privateKey.export({ type: 'pkcs8', format: 'pem' });
+  return { publicKey: publicKeyStr, privateKey: privateKeyStr };
+}
+
+async function get_data() {
   return new Promise((resolve, reject) => {
     let options = {
       method: 'GET',
@@ -50,7 +83,7 @@ function get_data() {
   });
 }
 
-function add_user(username, password, public_key, private_key) {
+async function add_user(username, password, public_key, private_key) {
   return new Promise((resolve, reject) => {
     var options = {
       method: 'POST',
@@ -75,18 +108,19 @@ function add_user(username, password, public_key, private_key) {
 async function checkLogin(username, password) {
   const data = await get_data();
   const parsedData = JSON.parse(data);
+  console.log(parsedData)
   for (let i = 0; i < parsedData.length; i++) {
     const user_dict = parsedData[i];
     if (user_dict.username === username) {
-      if (hash(password) === user_dict.password) {
-        console.log({
-          'username': username,
-          'public_key': decrypt(user_dict['public_key']),
-          'private_key': decrypt(user_dict['private_key'])
-        });
+      console.log('usernames match');
+      console.log(password);
+      let hashed_pass = await hash(password);
+      if (hashed_pass == user_dict.password) {
+        console.log(password)
+        console.log('correct')
         return {
           'username': username,
-          'public_key': decrypt(user_dict['public_key']),
+          'public_key': user_dict['public_key'],
           'private_key': decrypt(user_dict['private_key'])
         };
       }
@@ -95,7 +129,7 @@ async function checkLogin(username, password) {
   return null; // Return null if the login credentials are not found
 }
 
-function hash(data) {
+async function hash(data) {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
@@ -115,7 +149,7 @@ function decrypt(encryptedData, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')
 }
 
 app.get('/', (req, res) => {
-  res.render('index');
+  res.render('login');
 });
 
 app.get('/main', (req, res) => {
@@ -126,14 +160,10 @@ app.get('/main', (req, res) => {
   }
 });
 
-app.get('/encrypt', (req, res) => {
-
-});
-
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  let verify = await  checkLogin(username, password);
-
+  let verify = await checkLogin(username, password);
+  console.log(verify)
   if (verify != null) {
     req.session.username = verify['username'];
     req.session.public_key = verify['public_key'];
@@ -144,6 +174,24 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.post('/add_account', async (req, res) => {
+  const { username, password } = req.body;
+  let keys = await generate_keys();
+  console.log(username, password);
+  let hashed = await hash(password)
+  add_user(username, hashed, keys.publicKey, encrypt(keys.privateKey));
+  res.redirect('/'); // Redirect to the login page
+});
+
+app.get('/encrypt', (req, res) => {
+  const public_key = req.query.public_key
+  const private_key = req.body.private_keys
+});
+
+app.get('/create_account', (req, res) => {
+  res.render('create_account');
+});
+
 app.listen(3000, () => {
   console.log('server started');
 });
@@ -151,6 +199,11 @@ app.listen(3000, () => {
 
 // let data = await get_data();
 // console.log(data);
+let my_keys = await generate_keys();
+// let encrypted = encryptRSA('penis', my_keys.publicKey)
+// console.log(encrypted);
+// console.log(decryptRSA(encrypted, my_keys.privateKey))
 
-//let response = await add_user('posydon', hash('admin'), encrypt('pub_key'), encrypt('priv_key'));
+// let response = await add_user('posydon', hash('admin'), my_keys.publicKey, encrypt(my_keys.privateKey));
+
 //console.log(await checkLogin('posydon', 'admin'));

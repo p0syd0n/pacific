@@ -2,17 +2,15 @@ body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
-  background-color: #eee;
+  background-color: #222;
+  color: #fff;
   transition: all 0.3s ease;
 }
 
-/* *:hover {
-      display:none;
-} */
 .sidebar {
   width: 200px;
   height: 100vh;
-  background-color: #333;
+  background-color: #111;
   color: #fff;
   position: fixed;
   top: 0;
@@ -64,7 +62,7 @@ body {
   justify-content: flex-start;
   align-items: center;
   height: 50px;
-  background-color: #f1f1f1;
+  background-color: #333;
 }
 
 .tab {
@@ -72,8 +70,8 @@ body {
 }
 
 .tablinks {
-  background-color: #f1f1f1;
-  color: black;
+  background-color: #333;
+  color: #fff;
   border: none;
   outline: none;
   cursor: pointer;
@@ -83,13 +81,13 @@ body {
 }
 
 .tablinks:hover {
-  background-color: #ddd;
+  background-color: #444;
 }
 
 .tabcontent {
   display: none;
   padding: 20px;
-  background-color: white;
+  background-color: #111;
   height: calc(100vh - 50px);
 }
 
@@ -106,4 +104,3 @@ body {
   display: inline-block;
   vertical-align: middle;
 }
-

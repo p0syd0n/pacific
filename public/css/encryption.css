@@ -1,39 +1,46 @@
 #tab1 {
   display: none;
   padding: 20px;
-  background-color: #fff;
+  background-color: #111;
   height: calc(100vh - 50px);
 }
 
-#tab1 label, #tab1 label {
+#tab1 label,
+#tab1 label {
   display: block;
   margin-bottom: 5px;
   font-size: 16px;
+  color: #fff;
 }
 
-#tab1 select, #tab1 select {
+#tab1 select,
+#tab1 select {
   width: 100%;
   padding: 10px;
   font-size: 16px;
   border-radius: 5px;
   border: 1px solid #ccc;
-  background-color: #f9f9f9;
+  background-color: #333;
   box-sizing: border-box;
   margin-bottom: 10px;
+  color: #fff;
 }
 
-#tab1 input[type="text"], #tab1 input[type="text"] {
+#tab1 input[type="text"],
+#tab1 input[type="text"] {
   width: 100%;
   padding: 10px;
   font-size: 16px;
   border-radius: 5px;
   border: 1px solid #ccc;
-  background-color: #f9f9f9;
+  background-color: #333;
   box-sizing: border-box;
   margin-bottom: 10px;
+  color: #fff;
 }
 
-#tab1 button[type="submit"], #tab1 button[type="submit"] {
+#tab1 button[type="submit"],
+#tab1 button[type="submit"] {
   background-color: #546954;
   color: #fff;
   border: none;
@@ -43,6 +50,7 @@
   cursor: pointer;
 }
 
-#tab1 button[type="submit"]:hover, #tab1 button[type="submit"]:hover {
+#tab1 button[type="submit"]:hover,
+#tab1 button[type="submit"]:hover {
   background-color: #3f503f;
 }
