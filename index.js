@@ -79,10 +79,15 @@ async function checkLogin(username, password) {
     const user_dict = parsedData[i];
     if (user_dict.username === username) {
       if (hash(password) === user_dict.password) {
+        console.log({
+          'username': username,
+          'public_key': decrypt(user_dict['public_key']),
+          'private_key': decrypt(user_dict['private_key'])
+        });
         return {
           'username': username,
-          'public_key': decrypt(user_dict.public_key),
-          'private_key': decrypt(user_dict.private_key)
+          'public_key': decrypt(user_dict['public_key']),
+          'private_key': decrypt(user_dict['private_key'])
         };
       }
     }
@@ -113,16 +118,17 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  let verify = checkLogin(username, password)
+  let verify = await  checkLogin(username, password);
+
   if (verify != null) {
-    req.session.username = verify['username']
-    req.session.public_key = verify['public_key']
-    req.session.private_key = verify['private_key']
-    res.send(req.session)
+    req.session.username = verify['username'];
+    req.session.public_key = verify['public_key'];
+    req.session.private_key = verify['private_key'];
+    res.send(req.session);
   } else {
-    res.sendStatus(401)
+    res.sendStatus(401);
   }
 });
 
