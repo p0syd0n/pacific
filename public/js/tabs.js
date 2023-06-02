@@ -1,4 +1,4 @@
-document.getElementById("installations").click()
+document.getElementById("encryption_tab").click()
 function openTab(evt, tabName) {
   var i, tabcontent, tablinks;
 

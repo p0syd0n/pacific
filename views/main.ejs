@@ -23,16 +23,16 @@
 		<h2>Welcome, <%= username %></h2>
       <div class="tab-container">
         <div class="tab">
-          <button class="tablinks" id = "installations" onclick="openTab(event, 'tab1')">Main</button>
+          <button class="tablinks" id = "encryption_tab" onclick="openTab(event, 'tab1')">Main</button>
         </div>
         <div class="tab">
-          <button class="tablinks" id = "ipinfo" onclick="openTab(event, 'tab2')">Keys</button>
+          <button class="tablinks" id = "keys_tab" onclick="openTab(event, 'tab2')">Keys</button>
         </div>
       </div>
       
       <div id="tab1" class="tabcontent">
         <h3>Main</h3>
-        <form id="encryption-form">
+        <form id="encryption_form">
 
           <label for="data-input">Enter data to encrypt:</label>
           <input type="text" id="data-input">
@@ -59,7 +59,7 @@
         <div id="log-content"></div>
       </div>
       
-	<script src="/js/script.js"></script>
+	<script src="/js/tabs.js"></script>
   <script src="/js/encryption.js"></script>
 </body>
 </html>
