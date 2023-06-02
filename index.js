@@ -126,6 +126,10 @@ app.get('/main', (req, res) => {
   }
 });
 
+app.get('/encrypt', (req, res) => {
+
+});
+
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   let verify = await  checkLogin(username, password);

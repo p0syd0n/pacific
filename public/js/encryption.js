@@ -1,4 +1,3 @@
-console.log(document.cookie);
 function copyToClipboard(text) {
   // create a temporary textarea element
   const textarea = document.createElement('textarea');

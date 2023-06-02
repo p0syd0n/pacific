@@ -4,6 +4,7 @@
 	<title>Admin Panel</title>
   <link rel="icon" type="image/x-icon" href="/images/favicon.png">
 	<link rel="stylesheet" type="text/css" href="/css/styles.css">
+  <link rel="stylesheet" type="text/css" href="/css/encryption.css">
 </head>
 <body>
 	<div class="sidebar">
@@ -32,16 +33,12 @@
       <div id="tab1" class="tabcontent">
         <h3>Main</h3>
         <form id="encryption-form">
-          <label for="key-select">Select encryption key:</label>
-          <select id="key-select">
-            <option value="public">public</option>
-          </select>
-          <br>
+
           <label for="data-input">Enter data to encrypt:</label>
           <input type="text" id="data-input">
           <br>
-          <label for="init_vector">Enter initialization vector (passcode):</label>
-          <input type="text" id="init_vector">
+          <label for="public_key_input">Enter Public Key (tuple form):</label>
+          <input type="text" id="public_key_input">
           <br>
           <button type="submit">Encrypt data</button>
         </form>
@@ -95,5 +92,6 @@
       </div>
       
 	<script src="/js/script.js"></script>
+  <script src="/js/encryption.js"></script>
 </body>
 </html>
