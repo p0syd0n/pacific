@@ -18,7 +18,7 @@ const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
-app.use(express.static(__dirname + '/public'));
+app.use(express.static('public'));
 app.set('views', __dirname + '/views');
 
 app.use(
@@ -118,6 +118,14 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
+app.get('/main', (req, res) => {
+  if (req.session.username) {
+    res.render('main', {'username': req.session.username});
+  } else {
+    res.redirect('/')
+  }
+});
+
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   let verify = await  checkLogin(username, password);
@@ -126,7 +134,7 @@ app.post('/login', async (req, res) => {
     req.session.username = verify['username'];
     req.session.public_key = verify['public_key'];
     req.session.private_key = verify['private_key'];
-    res.send(req.session);
+    res.redirect('/main');
   } else {
     res.sendStatus(401);
   }
