@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import { config } from 'dotenv';
 import request from 'request';
-import { generateKey } from 'crypto';
+import { generateKeyPair, encrypt, decrypt } from 'rsa-keygen'
 config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -116,14 +116,14 @@ async function hash(data) {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
-function encrypt(data, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) {
+function encrypt_(data, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) {
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(data, 'utf8', 'hex');
   encrypted += cipher.final('hex');
   return encrypted;
 }
 
-function decrypt(encryptedData, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) {
+function decrypt_(encryptedData, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) {
   const buffer = Buffer.from(encryptedData, 'hex');
   const decipher = crypto.createDecipheriv(algorithm, key, iv);
   let decrypted = decipher.update(buffer, 'hex', 'utf8');
@@ -161,7 +161,7 @@ app.post('/add_account', async (req, res) => {
   let keys = await generate_keys();
   console.log(username, password);
   let hashed = await hash(password)
-  add_user(username, hashed, keys.publicKey, encrypt(keys.privateKey));
+  add_user(username, hashed, keys.publicKey, encrypt_(keys.privateKey));
   res.redirect('/'); // Redirect to the login page
 });
 
