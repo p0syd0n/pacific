@@ -25,7 +25,10 @@ function copyToClipboard(text) {
 function encrypt() {
   // get the input data and encryption key
   const inputData = document.getElementById('data-input').value;
-  const publicKey = document.getElementById('public_key_input').value;
+  let publicKey = document.getElementById('public_key_input').value;
+  publicKey = publicKey.replace(/\s+/g, ' ');
+  publicKey = publicKey.trim();
+  console.log(publicKey)
   if (publicKey === `-----BEGIN PUBLIC KEY-----
   MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkwwSc0B88G1RqNUAHWY
   /RkRUZO2Yz6Y4xJR1LFcH+xulnRepEUpfvwXePzrY2ymBOFeMGN89uRcgTgbZSrj
