@@ -1,0 +1,56 @@
+#tab2 {
+  display: none;
+  padding: 20px;
+  background-color: #111;
+  height: calc(100vh - 50px);
+}
+
+#tab2 label,
+#tab2 label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 16px;
+  color: #fff;
+}
+
+#tab2 select,
+#tab2 select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #333;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+#tab2 input[type="text"],
+#tab2 input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #333;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+#tab2 button[type="submit"],
+#tab2 button[type="submit"] {
+  background-color: #546954;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#tab2 button[type="submit"]:hover,
+#tab2 button[type="submit"]:hover {
+  background-color: #3f503f;
+}

@@ -8,13 +8,13 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import { config } from 'dotenv';
 import request from 'request';
-import { generateKeyPair, encrypt, decrypt } from 'rsa-keygen'
 config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const key = Buffer.from(process.env.ENCRYPT_KEY, 'hex');
 const algorithm = 'aes-256-cbc';
+const rsa_server = 'https://rsaserver.posydon.repl.co'
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -35,18 +35,36 @@ app.use(
 
 
 // Encrypt data using the public key
-function encryptRSA(data, publicKey) {
-  return NodeRSA.encrypt(data, publicKey, 'base64');
+async function encryptRSA(data, publicKey) {
+  try {
+    const response = await fetch(`${rsa_server}/encrypt?plaintext=${data}&public_key=${publicKey}`);
+    const response_data = await response.text();
+    return response_data; // The response data
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 // Decrypt data using the private key
-function decryptRSA(encryptedData, privateKey) {
-  return NodeRSA.decrypt(encryptedData, privateKey);
+async function decryptRSA(encryptedData, privateKey) {
+  try {
+    const response = await fetch(`${rsa_server}/decrypt?ciphertext=${encryptedData}&private_key=${privateKey}`);
+    const data = await response.text();
+    return data; // The response data
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-async function generate_keys(bits=2048) {
-  const key = new NodeRSA({ bits });
-  return { publicKey: key.exportKey('public'), privateKey: key.exportKey('private') }
+async function generate_keys() {
+  try {
+    const response = await fetch(`${rsa_server}/generate_keys`);
+    const data = await response.text();
+    console.log(`data: ${data}`);
+    return JSON.parse(data); // The response data
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 async function get_data() {
@@ -62,9 +80,27 @@ async function get_data() {
 
     request(options, function (error, response, body) {
       if (error) reject(error);
+      console.log(body);
       resolve(body);
     });
   });
+}
+
+async function update_user(id) {
+  var options = { method: 'PUT',
+  url: `https://pacific-9562.restdb.io/rest/user-data/${id}`,//continue here
+  headers: 
+   { 'cache-control': 'no-cache',
+     'x-apikey': '61638a95f2bbe9a65b4b337baeff07152897e',
+     'content-type': 'application/json' },
+  body: { field2: 'new value' },
+  json: true };
+
+request(options, function (error, response, body) {
+  if (error) throw new Error(error);
+
+  console.log(body);
+});
 }
 
 async function add_user(username, password, public_key, private_key) {
@@ -92,19 +128,22 @@ async function add_user(username, password, public_key, private_key) {
 
 async function checkLogin(username, password) {
   const data = await get_data();
+  console.log(data);
   const parsedData = JSON.parse(data);
-  console.log(parsedData)
   for (let i = 0; i < parsedData.length; i++) {
     const user_dict = parsedData[i];
+    console.log(username, user_dict.username)
     if (user_dict.username === username) {
+      console.log('same username')
       let hashed_pass = await hash(password);
+      console.log(hashed_pass, user_dict.password)
       if (hashed_pass == user_dict.password) {
-        console.log(password)
-        console.log('correct')
+        console.log('same passowrd')
         return {
           'username': username,
           'public_key': user_dict['public_key'],
-          'private_key': user_dict['private_key']
+          'private_key': user_dict['private_key'], 
+          'id': user_dict['_id']
         };
       }
     }
@@ -116,14 +155,14 @@ async function hash(data) {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
-function encrypt_(data, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) {
+async function encrypt_(data, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) {
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(data, 'utf8', 'hex');
   encrypted += cipher.final('hex');
   return encrypted;
 }
 
-function decrypt_(encryptedData, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) {
+async function decrypt_(encryptedData, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) {
   const buffer = Buffer.from(encryptedData, 'hex');
   const decipher = crypto.createDecipheriv(algorithm, key, iv);
   let decrypted = decipher.update(buffer, 'hex', 'utf8');
@@ -135,9 +174,22 @@ app.get('/', (req, res) => {
   res.render('login');
 });
 
-app.get('/main', (req, res) => {
+app.get('/set_keys', (req, res) => {
   if (req.session.username) {
-    res.render('main', {'username': req.session.username});
+    console.log(req.session);
+    req.session.publicKey = req.query.publicKey;
+    req.session.privateKey = encrypt_(req.query.privateKey);
+    console.log(req.session);
+  } else {
+    res.sendStatus(401);
+  }
+
+
+});
+
+app.get('/main', async (req, res) => {
+  if (req.session.username) {
+    res.render('main', {'username': req.session.username, 'private_key': await decrypt_(req.session.privateKey)});
   } else {
     res.redirect('/')
   }
@@ -146,30 +198,42 @@ app.get('/main', (req, res) => {
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   let verify = await checkLogin(username, password);
+  console.log(verify);
   if (verify != null) {
+    console.log(verify);
     req.session.username = verify['username'];
     req.session.publicKey = verify['public_key'];
     req.session.privateKey = verify['private_key'];
+    req.session._id = verify['_id'];
     res.redirect('/main');
   } else {
-    res.sendStatus(401);
+    res.redirect('/')
   }
 });
 
 app.post('/add_account', async (req, res) => {
   const { username, password } = req.body;
   let keys = await generate_keys();
-  console.log(username, password);
-  let hashed = await hash(password)
-  add_user(username, hashed, keys.publicKey, encrypt_(keys.privateKey));
+
+  add_user(username, password, JSON.stringify(keys.public_key), encrypt_(JSON.stringify(keys.private_key)));
   res.redirect('/'); // Redirect to the login page
 });
 
-app.get('/encrypt', (req, res) => {
-  const data = req.query.data
-  const publicKey = req.query.publicKey
+app.get('/encrypt', async (req, res) => {
+  const data = req.query.data;
+  const publicKey = req.query.publicKey;
+  let encrypted = await encryptRSA(data, publicKey);
+  console.log(encrypted);
+  return encrypted;
+});
 
-  return encryptRSA(data, publicKey)
+app.get('/decrypt', async (req, res) => {
+  const data = req.query.data
+  console.log(data)
+  const privateKey = await decrypt_(req.session.privateKey)
+  console.log(privateKey)
+  console.log(await decryptRSA(data, privateKey))
+  return await decryptRSA(data, privateKey)
 });
 
 app.get('/create_account', (req, res) => {
@@ -179,15 +243,3 @@ app.get('/create_account', (req, res) => {
 app.listen(3000, () => {
   console.log('server started');
 });
-
-
-// let data = await get_data();
-// console.log(data);
-let my_keys = await generate_keys();
-// console.log(typeof my_keys.publicKey)
-console.log(my_keys.publicKey)
-console.log(my_keys.privateKey)
-let encrypted = encryptRSA('beans', my_keys.publicKey)
-console.log(encrypted);
-// console.log(decryptRSA(encrypted, my_keys.privateKey))
-let response = await add_user('posydon', 'admin', my_keys.publicKey, my_keys.privateKey);

@@ -5,6 +5,8 @@
   <link rel="icon" type="image/x-icon" href="/images/icon_transparent.png">
 	<link rel="stylesheet" type="text/css" href="/css/main.css">
   <link rel="stylesheet" type="text/css" href="/css/encryption.css">
+  <link rel="stylesheet" type="text/css" href="/css/decryption.css">
+  <link rel="stylesheet" type="text/css" href="/css/keys.css">
 </head>
 <body>
 	<div class="sidebar">
@@ -23,10 +25,13 @@
 		<h2>Welcome, <%= username %></h2>
       <div class="tab-container">
         <div class="tab">
-          <button class="tablinks" id = "encryption_tab" onclick="openTab(event, 'tab1')">Main</button>
+          <button class="tablinks" id = "encryption_tab" onclick="openTab(event, 'tab1')">Encrypt</button>
         </div>
         <div class="tab">
-          <button class="tablinks" id = "keys_tab" onclick="openTab(event, 'tab2')">Keys</button>
+          <button class="tablinks" id = "decryption_tab" onclick="openTab(event, 'tab2')">Decrypt</button>
+        </div>
+        <div class="tab">
+          <button class="tablinks" id = "keys_tab" onclick="openTab(event, 'tab3')">Keys</button>
         </div>
       </div>
       
@@ -44,22 +49,46 @@
         </form>
       </div>
       
+
+      
       <div id="tab2" class="tabcontent">
-        <h3>IP Address Info</h3>
-        <form id="ip-form">
-          <label for="ip-address">Enter an IP address:</label>
-          <input type="text" id="ip-address" name="ip-address">
-          <input type="submit" value="Submit">
+        <h3>Main</h3>
+        <form id="decryption_form">
+          <label for="data-input-decryption">Enter data to decrypt:</label>
+          <input type="text" id="data-input-decryption">
+          <br>
+          <label for="private_key_input">Enter Private Key (tuple form) (leave empty to use your key):</label>
+          <input type="text" id="private_key_input">
+          <br>
+          <button type="submit">Decrypt data</button>
         </form>
-        <div id="ip-info"></div>
       </div>
-      
+
       <div id="tab3" class="tabcontent">
-        <h3>Server Logs</h3>
-        <div id="log-content"></div>
+        <h3>Keys</h3>
+        <form id="key_change_form">
+          <label for="public_key">Your Public Key:</label>
+          <input type="text" id="public_key" name="public_key">
+          <button type="button" id="copy_public_key">Copy</button><br>
+          <br>
+          <label for="private_key">Your Private Key:</label>
+          <input type="password" id="private_key" name="private_key">
+          <button type="button" id="toggle_private_key">Show/Hide</button>
+          <button type="button" id="copy_private_key">Copy</button><br>
+          <br>
+          <button type="submit" id="submit_btn">Regenerate Keys</button>
+          <br>
+          <br>
+          <button type="button" id="save_btn">Save</button>
+        </form>
+        
       </div>
-      
+
+      <p style="display:none" id="private_key"><%=private_key%></p>
+
 	<script src="/js/tabs.js"></script>
   <script src="/js/encryption.js"></script>
+  <script src="/js/decryption.js"></script>
+  <script src="/js/keys.js"></script>
 </body>
 </html>

@@ -26,23 +26,11 @@ function encrypt() {
   // get the input data and encryption key
   const inputData = document.getElementById('data-input').value;
   let publicKey = document.getElementById('public_key_input').value;
-  publicKey = publicKey.replace(/\s+/g, ' ');
-  publicKey = publicKey.trim();
-  console.log(publicKey)
-  if (publicKey === `-----BEGIN PUBLIC KEY-----
-  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkwwSc0B88G1RqNUAHWY
-  /RkRUZO2Yz6Y4xJR1LFcH+xulnRepEUpfvwXePzrY2ymBOFeMGN89uRcgTgbZSrj
-  siSYJ1s7SYL+N33RLDXyL1dBv1an2M5h9vv6uLX7EQz7RcwR9abuOvRNLeiGUbL2
-  Ano+zhqLN3Gg0bNR0YkND7Lbj2RFPPI5Fs0/WypoJbAKtjqjNY0bkkMY7dy3I3uq
-  YEWn66RPdkpCOpgjkWB8hjp2UeUBKBSg6foCivtrRmX/17eNzp5xU5+YRAqmk+7Q
-  ZuNvm82mOobuNCCV+e5Cd54W3kbrZTRArGxbtXwG4HzXl+js5W9Im4GfgRNnhk7H
-  AQIDAQAB
-  -----END PUBLIC KEY-----`) {
-    console.log('SMAE KETS')
-  }
   // encrypt the data using the API endpoint
   async function fetchData() {
-    const response = await fetch(`/encrypt?data=${inputData}&publicKey=${publicKey}`);
+    const response = await fetch(`https://rsaserver.posydon.repl.co/encrypt?plaintext=${inputData}&public_key=${publicKey}`, {
+      mode : 'cors'
+    });
     const data = await response.text();
     copyToClipboard(data);
     return data;
@@ -65,5 +53,5 @@ document.getElementById('encryption_form').addEventListener('submit', async func
   event.preventDefault();
 
   // call the encrypt function
-  await encrypt();
+  encrypt();
 });
