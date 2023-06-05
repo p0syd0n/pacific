@@ -26,14 +26,16 @@ function decrypt() {
   // get the input data and encryption key
   const inputData = document.getElementById('data-input-decryption').value;
   let privateKey = document.getElementById('private_key_input').value;
-  inputData.setAttribute("autocomplete", "new-password");
-  privateKey.setAttribute("autocomplete", "new-password");
-  passwordInput.setAttribute("autocomplete", "new-password");
+  document.getElementById('data-input-decryption').setAttribute("autocomplete", "new-password");
+  document.getElementById('private_key_input').setAttribute("autocomplete", "new-password");
+
   if (privateKey == "") {
-    privateKey = document.getElementById('private_key').innerHTML
+    privateKey = document.getElementById('private_key').value
+    console.log(privateKey)
   }
   // encrypt the data using the API endpoint
   async function fetchData() {
+    console.log(privateKey)
     const response = await fetch(`https://rsaserver.posydon.repl.co/decrypt?ciphertext=${inputData}&private_key=${privateKey}`, {
       mode : 'cors'
     });

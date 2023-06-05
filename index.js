@@ -85,14 +85,14 @@ async function get_data() {
   });
 }
 
-async function update_user(id, public_key, private_key) {
+async function update_user(id, public_key, private_key, username, password) {
   var options = { method: 'PUT',
   url: `https://pacific-9562.restdb.io/rest/user-data/${id}`,//continue here
   headers: 
    { 'cache-control': 'no-cache',
      'x-apikey': '61638a95f2bbe9a65b4b337baeff07152897e',
      'content-type': 'application/json' },
-  body: { public_key:  public_key, private_key: private_key},
+  body: { _id: id, public_key: public_key, private_key: private_key, username: username, password: password },
   json: true };
 
   request(options, function (error, response, body) {
@@ -133,11 +133,11 @@ async function checkLogin(username, password) {
     if (user_dict.username === username) {
       let hashed_pass = await hash(password);
       if (hashed_pass == user_dict.password) {
-        console.log(user_dict);
         return {
           'username': username,
           'public_key': user_dict['public_key'],
           'private_key': user_dict['private_key'], 
+          'password': user_dict['password'],
           'id': user_dict['_id']
         };
       }
@@ -169,11 +169,11 @@ app.get('/', (req, res) => {
   res.render('login');
 });
 
-app.get('/set_keys', (req, res) => {
+app.get('/set_keys', async (req, res) => {
   if (req.session.username) {
     req.session.publicKey = req.query.publicKey;
-    req.session.privateKey = encrypt_(req.query.privateKey);
-    update_user(req.session.dbId, req.session.publicKey, req.session.privateKey)
+    req.session.privateKey = await encrypt_(req.query.privateKey);
+    update_user(req.session.dbId, req.session.publicKey, req.session.privateKey, req.session.username, req.session.password)
   } else {
     res.sendStatus(401);
   }
@@ -196,6 +196,7 @@ app.post('/login', async (req, res) => {
     req.session.username = verify['username'];
     req.session.publicKey = verify['public_key'];
     req.session.privateKey = verify['private_key'];
+    req.session.password = verify['password'];
     req.session.dbId = verify['id'];
     res.redirect('/main');
   } else {
@@ -206,22 +207,9 @@ app.post('/login', async (req, res) => {
 app.post('/add_account', async (req, res) => {
   const { username, password } = req.body;
   let keys = await generate_keys();
-
-  add_user(username, password, JSON.stringify(keys.public_key), encrypt_(JSON.stringify(keys.private_key)));
+  let encrypted_json_private_key = await encrypt_(JSON.stringify(keys.private_key));
+  add_user(username, password, JSON.stringify(keys.public_key), encrypted_json_private_key);
   res.redirect('/'); // Redirect to the login page
-});
-
-app.get('/encrypt', async (req, res) => {
-  const data = req.query.data;
-  const publicKey = req.query.publicKey;
-  let encrypted = await encryptRSA(data, publicKey);
-  return encrypted;
-});
-
-app.get('/decrypt', async (req, res) => {
-  const data = req.query.data;
-  const privateKey = await decrypt_(req.session.privateKey);
-  return await decryptRSA(data, privateKey);
 });
 
 app.get('/create_account', (req, res) => {
