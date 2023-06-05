@@ -68,11 +68,11 @@
         <h3>Keys</h3>
         <form id="key_change_form">
           <label for="public_key">Your Public Key:</label>
-          <input type="text" id="public_key" name="public_key">
+          <input type="text" value = "<%= public_key %>"id="public_key" name="public_key">
           <button type="button" id="copy_public_key">Copy</button><br>
           <br>
           <label for="private_key">Your Private Key:</label>
-          <input type="password" id="private_key" name="private_key">
+          <input type="password" value="<%= private_key %>" id="private_key" name="private_key">
           <button type="button" id="toggle_private_key">Show/Hide</button>
           <button type="button" id="copy_private_key">Copy</button><br>
           <br>

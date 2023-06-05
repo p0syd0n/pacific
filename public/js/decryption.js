@@ -26,6 +26,9 @@ function decrypt() {
   // get the input data and encryption key
   const inputData = document.getElementById('data-input-decryption').value;
   let privateKey = document.getElementById('private_key_input').value;
+  inputData.setAttribute("autocomplete", "new-password");
+  privateKey.setAttribute("autocomplete", "new-password");
+  passwordInput.setAttribute("autocomplete", "new-password");
   if (privateKey == "") {
     privateKey = document.getElementById('private_key').innerHTML
   }

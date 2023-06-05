@@ -183,7 +183,7 @@ app.get('/set_keys', (req, res) => {
 
 app.get('/main', async (req, res) => {
   if (req.session.username) {
-    res.render('main', {'username': req.session.username, 'private_key': await decrypt_(req.session.privateKey)});
+    res.render('main', {'username': req.session.username, 'private_key': await decrypt_(req.session.privateKey), 'public_key': req.session.publicKey});
   } else {
     res.redirect('/');
   }
