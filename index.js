@@ -86,6 +86,7 @@ async function get_data() {
 }
 
 async function update_user(id, public_key, private_key, username, password) {
+  console.log('updating')
   var options = { method: 'PUT',
   url: `https://pacific-9562.restdb.io/rest/user-data/${id}`,//continue here
   headers: 
@@ -171,6 +172,7 @@ app.get('/', (req, res) => {
 
 app.get('/set_keys', async (req, res) => {
   if (req.session.username) {
+    console.log('setting')
     req.session.publicKey = req.query.publicKey;
     req.session.privateKey = await encrypt_(req.query.privateKey);
     update_user(req.session.dbId, req.session.publicKey, req.session.privateKey, req.session.username, req.session.password)
@@ -214,6 +216,11 @@ app.post('/add_account', async (req, res) => {
 
 app.get('/create_account', (req, res) => {
   res.render('create_account');
+});
+
+app.get('/logout', (Req, res) => {
+  req.session.destroy()
+  res.redirect('/')
 });
 
 app.listen(3000, () => {
