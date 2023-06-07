@@ -34,6 +34,28 @@ app.use(
 );
 
 
+// Encrypt data using the public key
+async function encryptRSA(data, publicKey) {
+  try {
+    const response = await fetch(`${rsa_server}/encrypt?plaintext=${data}&public_key=${publicKey}`);
+    const response_data = await response.text();
+    return response_data; // The response data
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+// Decrypt data using the private key
+async function decryptRSA(encryptedData, privateKey) {
+  try {
+    const response = await fetch(`${rsa_server}/decrypt?ciphertext=${encryptedData}&private_key=${privateKey}`);
+    const data = await response.text();
+    return data; // The response data
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 async function generate_keys() {
   try {
     const response = await fetch(`${rsa_server}/generate_keys`);
@@ -45,80 +67,79 @@ async function generate_keys() {
 }
 
 async function get_data() {
-  try {
-    const response = await executeSQL("SELECT * FROM main.users;");
-    return JSON.parse(response);
-  } catch (error) {
-    console.log('error', error);
-    throw error;
-  }
+  return new Promise((resolve, reject) => {
+    let options = {
+      method: 'GET',
+      url: 'https://pacific-9562.restdb.io/rest/user-data',
+      headers: {
+        'cache-control': 'no-cache',
+        'x-apikey': '61638a95f2bbe9a65b4b337baeff07152897e',
+      },
+    };
+
+    request(options, function (error, response, body) {
+      if (error) reject(error);
+      console.log(body);
+      resolve(body);
+    });
+  });
 }
 
+async function update_user(id, public_key, private_key, username, password) {
+  console.log('updating')
+  var options = { method: 'PUT',
+  url: `https://pacific-9562.restdb.io/rest/user-data/${id}`,//continue here
+  headers: 
+   { 'cache-control': 'no-cache',
+     'x-apikey': '61638a95f2bbe9a65b4b337baeff07152897e',
+     'content-type': 'application/json' },
+  body: { _id: id, public_key: public_key, private_key: private_key, username: username, password: password },
+  json: true };
 
-async function update_user(username, password, public_key, private_key) {
-  try {
-    const response = await executeSQL(`UPDATE main.users SET password = '${password}', private_key =  '${private_key}', public_key ='${public_key}' WHERE username = '${username}'`);
-    console.log(JSON.parse(response));
-    return JSON.parse(response);
-  } catch (error) {
-    console.log('error', error);
-    throw error;
-  }
+  request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+
+    console.log(body);
+});
 }
 
 async function add_user(username, password, public_key, private_key) {
   let hashed = await hash(password)
-  //let hashed = password;
-  try {
-    const response = await executeSQL(`INSERT INTO main.users (username, password, public_key, private_key) VALUE ('${username}', '${hashed}', '${public_key}', '${private_key}')`);
-    return JSON.parse(response);
-  } catch (error) {
-    console.log('error', error);
-    throw error;
-  }
-}
-
-async function executeSQL(sql) {
-  try {
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", "Basic cG9zeWRvbjozM0tvcm92eSE=");
-
-    var raw = JSON.stringify({
-      "operation": "sql",
-      "sql": sql
-    });
-
-    var requestOptions = {
+  return new Promise((resolve, reject) => {
+    var options = {
       method: 'POST',
-      headers: myHeaders,
-      body: raw,
-      redirect: 'follow'
+      url: 'https://pacific-9562.restdb.io/rest/user-data',
+      headers: {
+        'cache-control': 'no-cache',
+        'x-apikey': '61638a95f2bbe9a65b4b337baeff07152897e',
+        'content-type': 'application/json',
+      },
+      body: { username, password: hashed, public_key, private_key },
+      json: true,
     };
 
-    const response = await fetch("https://users-pacific.harperdbcloud.com", requestOptions);
-    const result = await response.text();
-    return result;
-  } catch (error) {
-    console.log('error', error);
-    throw error;
-  }
+    request(options, function (error, response, body) {
+      if (error) reject(error);
+      resolve(body);
+    });
+  });
 }
 
+
 async function checkLogin(username, password) {
-  let parsedData = await get_data();
+  const data = await get_data();
+  const parsedData = JSON.parse(data);
   for (let i = 0; i < parsedData.length; i++) {
     const user_dict = parsedData[i];
     if (user_dict.username === username) {
       let hashed_pass = await hash(password);
-      //let hashed_pass = password
       if (hashed_pass == user_dict.password) {
         return {
           'username': username,
-          'public_key': user_dict.publicKey,
-          'private_key': user_dict.privateKey, 
-          'password': user_dict.password,
-          'id': user_dict['7']
+          'public_key': user_dict['public_key'],
+          'private_key': user_dict['private_key'], 
+          'password': user_dict['password'],
+          'id': user_dict['_id']
         };
       }
     }
@@ -158,13 +179,13 @@ app.get('/set_keys', async (req, res) => {
   } else {
     res.sendStatus(401);
   }
+
+
 });
 
 app.get('/main', async (req, res) => {
   if (req.session.username) {
-    //let decrypted_private_key = await decrypt_(req.session.privateKey)
-    let decrypted_private_key = req.session.privateKey
-    res.render('main', {'username': req.session.username, 'private_key': decrypted_private_key, 'public_key': req.session.publicKey});
+    res.render('main', {'username': req.session.username, 'private_key': await decrypt_(req.session.privateKey), 'public_key': req.session.publicKey});
   } else {
     res.redirect('/');
   }
@@ -202,8 +223,6 @@ app.get('/logout', (req, res) => {
   res.redirect('/')
 });
 
-app.listen(3000, async () => {
-  let p = await get_data()
-  console.log(p)
+app.listen(3000, () => {
   console.log('server started');
 });

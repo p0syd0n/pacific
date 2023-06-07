@@ -10,7 +10,7 @@ function copyPublicKey() {
 }
 
 function save_keys() {
-  if (alert("Are you sure? You should only manually set keys if you are aware of what you are doing.")) {
+  if (confirm("Are you sure? You should only manually set keys if you are aware of what you are doing.")) {
     alert('saving ')
     fetch(`/set_keys?privateKey=${document.getElementById("private_key").value}&publicKey=${document.getElementById("public_key").value}`);
   }
