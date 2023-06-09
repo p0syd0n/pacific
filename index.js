@@ -33,7 +33,7 @@ app.use(
   })
 );
 
-
+//request to rsa server to generate keys
 async function generate_keys() {
   try {
     const response = await fetch(`${rsa_server}/generate_keys`);
@@ -44,81 +44,76 @@ async function generate_keys() {
   }
 }
 
+// getting data from server
 async function get_data() {
-  try {
-    const response = await executeSQL("SELECT * FROM main.users;");
-    return JSON.parse(response);
-  } catch (error) {
-    console.log('error', error);
-    throw error;
-  }
+  return new Promise((resolve, reject) => {
+    let options = {
+      method: 'GET',
+      url: 'https://pacific-9562.restdb.io/rest/user-data',
+      headers: {
+        'cache-control': 'no-cache',
+        'x-apikey': process.env.API_KEY,
+      },
+    };
+    request(options, function (error, response, body) {
+      if (error) reject(error);
+      resolve(body);
+    });
+  });
 }
 
-
-async function update_user(username, password, public_key, private_key) {
-  try {
-    const response = await executeSQL(`UPDATE main.users SET password = '${password}', private_key =  '${private_key}', public_key ='${public_key}' WHERE username = '${username}'`);
-    console.log(JSON.parse(response));
-    return JSON.parse(response);
-  } catch (error) {
-    console.log('error', error);
-    throw error;
-  }
+//updating the user info
+async function update_user(id, public_key, private_key, username, password) {
+  var options = { method: 'PUT',
+  url: `https://pacific-9562.restdb.io/rest/user-data/${id}`,//continue here
+  headers: 
+   { 'cache-control': 'no-cache',
+     'x-apikey': process.env.API_KEY,
+     'content-type': 'application/json' },
+  body: { _id: id, public_key: public_key, private_key: private_key, username: username, password: password },
+  json: true };
+  request(options, function (error, response, body) {
+    if (error) throw new Error(error);
+});
 }
 
+//adding users
 async function add_user(username, password, public_key, private_key) {
   let hashed = await hash(password)
-  //let hashed = password;
-  try {
-    const response = await executeSQL(`INSERT INTO main.users (username, password, public_key, private_key) VALUE ('${username}', '${hashed}', '${public_key}', '${private_key}')`);
-    return JSON.parse(response);
-  } catch (error) {
-    console.log('error', error);
-    throw error;
-  }
-}
-
-async function executeSQL(sql) {
-  try {
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Authorization", "Basic cG9zeWRvbjozM0tvcm92eSE=");
-
-    var raw = JSON.stringify({
-      "operation": "sql",
-      "sql": sql
-    });
-
-    var requestOptions = {
+  return new Promise((resolve, reject) => {
+    var options = {
       method: 'POST',
-      headers: myHeaders,
-      body: raw,
-      redirect: 'follow'
+      url: 'https://pacific-9562.restdb.io/rest/user-data',
+      headers: {
+        'cache-control': 'no-cache',
+        'x-apikey': process.env.API_KEY,
+        'content-type': 'application/json',
+      },
+      body: { username, password: hashed, public_key, private_key },
+      json: true,
     };
-
-    const response = await fetch("https://users-pacific.harperdbcloud.com", requestOptions);
-    const result = await response.text();
-    return result;
-  } catch (error) {
-    console.log('error', error);
-    throw error;
-  }
+    request(options, function (error, response, body) {
+      if (error) reject(error);
+      resolve(body);
+    });
+  });
 }
 
+//checking login
 async function checkLogin(username, password) {
-  let parsedData = await get_data();
+  const data = await get_data();
+  const parsedData = JSON.parse(data);
   for (let i = 0; i < parsedData.length; i++) {
     const user_dict = parsedData[i];
     if (user_dict.username === username) {
       let hashed_pass = await hash(password);
-      //let hashed_pass = password
       if (hashed_pass == user_dict.password) {
         return {
           'username': username,
-          'public_key': user_dict.publicKey,
-          'private_key': user_dict.privateKey, 
-          'password': user_dict.password,
-          'id': user_dict['7']
+          'public_key': user_dict['public_key'],
+          'private_key': user_dict['private_key'], 
+          'password': user_dict['password'],
+          'id': user_dict['_id']
         };
       }
     }
@@ -130,6 +125,7 @@ async function hash(data) {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
+//helper function for encrypting
 async function encrypt_(data, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) {
   const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(data, 'utf8', 'hex');
@@ -137,6 +133,7 @@ async function encrypt_(data, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) 
   return encrypted;
 }
 
+//helper function for decrypting
 async function decrypt_(encryptedData, iv = Buffer.from(process.env.INIT_VECTOR, 'hex')) {
   const buffer = Buffer.from(encryptedData, 'hex');
   const decipher = crypto.createDecipheriv(algorithm, key, iv);
@@ -145,15 +142,18 @@ async function decrypt_(encryptedData, iv = Buffer.from(process.env.INIT_VECTOR,
   return decrypted;
 }
 
+//rendering login
 app.get('/', (req, res) => {
   res.render('login');
 });
 
+// updating keys
 app.get('/set_keys', async (req, res) => {
   if (req.session.username) {
-    console.log('setting')
+    //in the session
     req.session.publicKey = req.query.publicKey;
     req.session.privateKey = await encrypt_(req.query.privateKey);
+    //in the database
     update_user(req.session.dbId, req.session.publicKey, req.session.privateKey, req.session.username, req.session.password)
   } else {
     res.sendStatus(401);
@@ -161,31 +161,43 @@ app.get('/set_keys', async (req, res) => {
 });
 
 app.get('/main', async (req, res) => {
+  //checking if user is logged in
   if (req.session.username) {
-    //let decrypted_private_key = await decrypt_(req.session.privateKey)
-    let decrypted_private_key = req.session.privateKey
-    res.render('main', {'username': req.session.username, 'private_key': decrypted_private_key, 'public_key': req.session.publicKey});
+    //getting list of users public keys, for the reference
+    let data = await get_data();
+    data = JSON.parse(data);
+    let users_available = '';
+    for (let i = 0; i < data.length; i++) {
+      let current_user = data[i];
+      users_available += `${current_user['username']}:${current_user['public_key']}\n`;
+    }
+    //rendering main page with necessary information
+    res.render('main', {'username': req.session.username, 'private_key': await decrypt_(req.session.privateKey), 'public_key': req.session.publicKey, 'users_available': users_available});
   } else {
     res.redirect('/');
   }
 });
 
+//verifying login
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   let verify = await checkLogin(username, password);
   if (verify != null) {
+    //if not null, saving the credentials to the session
     req.session.username = verify['username'];
     req.session.publicKey = verify['public_key'];
     req.session.privateKey = verify['private_key'];
-    req.session.password = verify['password'];
+    req.session.password = verify['password']; //password is hashed in db, so will be hashed in session as well
     req.session.dbId = verify['id'];
     res.redirect('/main');
   } else {
+    //if not correct, go back to login
     res.redirect('/');
   }
 });
 
 app.post('/add_account', async (req, res) => {
+  //generating keys and adding a new account
   const { username, password } = req.body;
   let keys = await generate_keys();
   let encrypted_json_private_key = await encrypt_(JSON.stringify(keys.private_key));
@@ -193,17 +205,27 @@ app.post('/add_account', async (req, res) => {
   res.redirect('/'); // Redirect to the login page
 });
 
+//rendering account creation
 app.get('/create_account', (req, res) => {
   res.render('create_account');
 });
 
 app.get('/logout', (req, res) => {
+  //destroying session on logout
   req.session.destroy()
   res.redirect('/')
 });
 
-app.listen(3000, async () => {
-  let p = await get_data()
-  console.log(p)
+app.get('/account', (req, res) => {
+  res.render('account_info', {'username': req.session.username, 'password_hash': req.session.password});
+});
+
+app.get('/update_login', async (req, res) => {
+  let hashed = await hash(req.query.password)
+  update_user(req.session.dbId, req.session.publicKey, req.session.privateKey, req.query.username, hashed)
+  res.sendStatus(200);
+});
+
+app.listen(3000, () => {
   console.log('server started');
 });

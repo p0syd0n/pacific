@@ -1,4 +1,4 @@
-// Copy private key function
+// Copy key functions
 function copyPrivateKey() {
   const privateKey = document.getElementById('private_key').value;
   copyToClipboard(privateKey)
@@ -11,7 +11,7 @@ function copyPublicKey() {
 
 function save_keys() {
   if (confirm("Are you sure? You should only manually set keys if you are aware of what you are doing.")) {
-    alert('saving ')
+    // setting keys using server endpoint
     fetch(`/set_keys?privateKey=${document.getElementById("private_key").value}&publicKey=${document.getElementById("public_key").value}`);
   }
 }
@@ -55,17 +55,17 @@ function togglePrivateKeyVisibility() {
 }
 
 async function regenerateKeys() {
-  alert('regenerating')
-  let current = document.getElementById("private_key").value
-
+  //getting new keys from server
   const response = await fetch('https://rsaserver.posydon.repl.co/generate_keys', {
     mode : 'cors'
   });
   const dataString = await response.text();
   const data = JSON.parse(dataString);
   console.log(data)
+  //setting keys in webpage
   document.getElementById("private_key").value = "[" + data.private_key.join(", ") + "]";
   document.getElementById("public_key").value = "[" + data.public_key.join(", ") + "]";
+  //setting keys using server endpoint
   fetch(`/set_keys?privateKey=${document.getElementById("private_key").value}&publicKey=${document.getElementById("public_key").value}`);
   return data;
 }
@@ -78,7 +78,7 @@ document.getElementById('toggle_private_key').addEventListener('click', togglePr
 document.getElementById('key_change_form').addEventListener('submit', function(event) {
   event.preventDefault(); // Prevent default form submission
 
-  // Call your JavaScript function here for form action handling
+  // Calling regenerateKeys function
   regenerateKeys();
 });
 

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Account Information</title>
+  <link rel="stylesheet" type="text/css" href="/css/main.css">
+  <link rel="stylesheet" type="text/css" href="/css/account_info.css">
+</head>
+<body>
+  <div class="account-info">
+    <label for="username">Username:</label>
+    <input type="text" id="username" autocomplete="new-password" value="<%= username %>">
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" autocomplete="new-password" placeholder="<%= password_hash %>">
+    <br>
+    <!-- autocomplete="new-password"  -->
+    <div id="password-toggle" class="password-toggle">Show Password</div>
+
+    <div class="save-button">
+      <button onclick="save()">Save</button>
+    </div>
+  </div>
+  <p style="display:none" id="username" value="<%= username %>"></p>
+  <p style="display:none" id="password" value="<%= password_hash %>"></p>
+
+  <script src="/js/account_info.js"></script>
+</body>
+</html>

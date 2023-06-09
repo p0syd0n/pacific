@@ -30,9 +30,11 @@ function decrypt() {
   document.getElementById('private_key_input').setAttribute("autocomplete", "new-password");
 
   if (privateKey == "") {
+    //if field is empty, use private key of user
     privateKey = document.getElementById('private_key').value
     console.log(privateKey)
   }
+
   // encrypt the data using the API endpoint
   async function fetchData() {
     console.log(privateKey)
@@ -61,6 +63,6 @@ document.getElementById('decryption_form').addEventListener('submit', async func
   // prevent the form from submitting and reloading the page
   event.preventDefault();
 
-  // call the encrypt function
+  // call the decrypt function
   decrypt();
 });

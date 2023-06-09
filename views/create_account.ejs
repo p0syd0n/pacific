@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Account Creation</title>
-  <link rel="stylesheet" type="text/css" href="/css/styles.css">
+  <link rel="stylesheet" type="text/css" href="/css/main.css">
   <link rel="stylesheet" type="text/css" href="/css/create_account.css">
 </head>
 <body>
@@ -10,9 +10,11 @@
     <h2>Create Account</h2>
     <form action="/add_account" method="POST">
       <input id="username" name="username" type="text" placeholder="Username" required>
+      <p>This username will be visible to other Pacific users.</p>
       <input id="password" name="password" type="password" placeholder="Password" required>
       <button type="submit">Create Account Now</button>
     </form>
+
   </div>
 </body>
 </html>

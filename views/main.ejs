@@ -38,7 +38,7 @@
       <div id="tab1" class="tabcontent">
         <h3>Main</h3>
         <form id="encryption_form">
-
+          <textarea style="background-color: black; color: white;" ><%= users_available %></textarea>
           <label for="data-input">Enter data to encrypt:</label>
           <input type="text" id="data-input">
           <br>
@@ -83,8 +83,9 @@
         </form>
         
       </div>
-
+      <!-- so the scripts can use this info -->
       <p style="display:none" id="private_key" value="<%=private_key%>"></p>
+      
 
 	<script src="/js/tabs.js"></script>
   <script src="/js/encryption.js"></script>
