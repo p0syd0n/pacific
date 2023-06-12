@@ -16,6 +16,13 @@ const key = Buffer.from(process.env.ENCRYPT_KEY, 'hex');
 const algorithm = 'aes-256-cbc';
 const rsa_server = 'https://rsaserver.posydon.repl.co'
 const app = express();
+import CyclicSessionStore from '@cyclic.sh/session-store';
+
+const options = {
+  table: {
+    name: process.env.CYCLIC_DB,
+  }
+};
 
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
@@ -219,7 +226,7 @@ app.get('/logout', (req, res) => {
 app.get('/account', (req, res) => {
   res.render('account_info', {'username': req.session.username, 'password_hash': req.session.password});
 });
-
+                                               
 app.get('/update_login', async (req, res) => {
   let hashed = await hash(req.query.password)
   update_user(req.session.dbId, req.session.publicKey, req.session.privateKey, req.query.username, hashed)
