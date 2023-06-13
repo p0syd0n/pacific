@@ -46,13 +46,22 @@ function decrypt() {
     copyToClipboard(data);
     return data;
   }
-
+  const resultDiv = document.createElement('div');
+  resultDiv.textContent = `Estimated time: ${inputData.length} seconds`;
+  document.getElementById('decryption_form').appendChild(resultDiv);
+  
+  let timeLeft = inputData.length;
+  let secondsInterval = setInterval(() => {
+    timeLeft--;
+    resultDiv.textContent = `Estimated time: ${timeLeft} seconds`;
+  }, 1000);
+  
   // display the encrypted data on the page
   fetchData().then((decryptedData) => {
-    const resultDiv = document.createElement('div');
+    clearInterval(secondsInterval);
     resultDiv.textContent = `Decrypted '${inputData}': ${decryptedData}`;
-    document.getElementById('decryption_form').appendChild(resultDiv);
   });
+  
   document.getElementById("data-input-decryption").value = "";
   // prevent form submission
   return false;
