@@ -81,6 +81,9 @@ async function generate_keys() {
     console.error(error);
   }
 }
+/*
+test
+*/
 
 // getting data from server
 async function get_data() {
