@@ -39,7 +39,38 @@ app.use(
     },
   })
 );
+// Generate a random session key
+function generateSessionKey() {
+  const sessionKeyLength = 32; // 32 bytes = 256 bits
+  const randomBytes = crypto.randomBytes(sessionKeyLength);
+  const sessionKey = randomBytes.toString('hex');
+  return sessionKey;
+}
 
+// Generate a random encryption key
+function generateEncryptionKey() {
+  const encryptionKeyLength = 32; // 32 bytes = 256 bits
+  const randomBytes = crypto.randomBytes(encryptionKeyLength);
+  const encryptionKey = randomBytes.toString('hex');
+  return encryptionKey;
+}
+
+// Generate a random encryption initialization vector (IV)
+function generateEncryptionIV() {
+  const encryptionIVLength = 16; // 16 bytes = 128 bits
+  const randomBytes = crypto.randomBytes(encryptionIVLength);
+  const encryptionIV = randomBytes.toString('hex');
+  return encryptionIV;
+}
+
+// Example usage
+const sessionKey = generateSessionKey();
+const encryptionKey = generateEncryptionKey();
+const encryptionIV = generateEncryptionIV();
+
+console.log('Session Key:', sessionKey);
+console.log('Encryption Key:', encryptionKey);
+console.log('Encryption IV:', encryptionIV);
 //request to rsa server to generate keys
 async function generate_keys() {
   try {
