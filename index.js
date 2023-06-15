@@ -1,8 +1,6 @@
 import express from 'express';
 import session from 'express-session';
 import fetch from 'node-fetch';
-import io from 'socket.io-client';
-import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -15,14 +13,8 @@ const __dirname = path.dirname(__filename);
 const key = Buffer.from(process.env.ENCRYPT_KEY, 'hex');
 const algorithm = 'aes-256-cbc';
 const rsa_server = 'https://rsaserver.posydon.repl.co'
-const app = express();
-import CyclicSessionStore from '@cyclic.sh/session-store';
 
-const options = {
-  table: {
-    name: process.env.CYCLIC_DB,
-  }
-};
+const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
@@ -39,38 +31,7 @@ app.use(
     },
   })
 );
-// Generate a random session key
-function generateSessionKey() {
-  const sessionKeyLength = 32; // 32 bytes = 256 bits
-  const randomBytes = crypto.randomBytes(sessionKeyLength);
-  const sessionKey = randomBytes.toString('hex');
-  return sessionKey;
-}
 
-// Generate a random encryption key
-function generateEncryptionKey() {
-  const encryptionKeyLength = 32; // 32 bytes = 256 bits
-  const randomBytes = crypto.randomBytes(encryptionKeyLength);
-  const encryptionKey = randomBytes.toString('hex');
-  return encryptionKey;
-}
-
-// Generate a random encryption initialization vector (IV)
-function generateEncryptionIV() {
-  const encryptionIVLength = 16; // 16 bytes = 128 bits
-  const randomBytes = crypto.randomBytes(encryptionIVLength);
-  const encryptionIV = randomBytes.toString('hex');
-  return encryptionIV;
-}
-
-// Example usage
-const sessionKey = generateSessionKey();
-const encryptionKey = generateEncryptionKey();
-const encryptionIV = generateEncryptionIV();
-
-console.log('Session Key:', sessionKey);
-console.log('Encryption Key:', encryptionKey);
-console.log('Encryption IV:', encryptionIV);
 //request to rsa server to generate keys
 async function generate_keys() {
   try {
@@ -81,9 +42,6 @@ async function generate_keys() {
     console.error(error);
   }
 }
-/*
-test
-*/
 
 // getting data from server
 async function get_data() {
