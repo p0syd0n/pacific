@@ -33,6 +33,9 @@
         <div class="tab">
           <button class="tablinks" id = "keys_tab" onclick="openTab(event, 'tab3')">Keys</button>
         </div>
+        <div class="tab">
+          <button class="tablinks" id = "messages_tab" onclick="openTab(event, 'tab4')">Messages</button>
+        </div>
       </div>
       
       <div id="tab1" class="tabcontent">
@@ -81,8 +84,24 @@
           <br>
           <button type="button" id="save_btn">Save</button>
         </form>
-        
       </div>
+
+      <div id="tab4" class="tabcontent">
+        <h3>Messages</h3>
+        <table id="messages-table">
+          <thead>
+            <tr>
+              <th>To</th>
+              <th>From</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody id="messages-body">
+            <!-- Messages will be dynamically added here -->
+          </tbody>
+        </table>
+      </div>
+
       <!-- so the scripts can use this info -->
       <p style="display:none" id="private_key" value="<%=private_key%>"></p>
       
@@ -90,6 +109,7 @@
 	<script src="/js/tabs.js"></script>
   <script src="/js/encryption.js"></script>
   <script src="/js/decryption.js"></script>
+  <script src="/js/messages.js"></script>
   <script src="/js/keys.js"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@ async function save() {
   var username = document.getElementById("username").value;
   var password = document.getElementById("password").value;
 
-  let response = await fetch(`/update_user?username=${username}&password=${password}`);
+  let response = await fetch(`/update_login?username=${username}&password=${password}`);
 }
 
 var passwordToggle = document.getElementById("password-toggle");
