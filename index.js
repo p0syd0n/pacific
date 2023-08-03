@@ -184,8 +184,9 @@ app.post('/login', async (req, res) => {
     req.session.privateKey = verify['private_key'];
     req.session.password = verify['password']; //password is hashed in db, so will be hashed in session as well
     req.session.dbId = verify['id'];
-    console.log('done')
+    console.log('done');
     res.redirect('/main');
+    console.log('redirected');
   } else {
     //if not correct, go back to login
     res.redirect('/');
