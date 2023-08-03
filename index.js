@@ -113,6 +113,7 @@ async function checkLogin(username, password) {
   return null; // Return null if the login credentials are not found
 }
 
+//password hashing function
 async function hash(data) {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
@@ -211,10 +212,16 @@ app.get('/logout', (req, res) => {
   res.redirect('/')
 });
 
+//account info
 app.get('/account', (req, res) => {
-  res.render('account_info', {'username': req.session.username, 'password_hash': req.session.password});
+  if (req.session.username) {
+    res.render('account_info', {'username': req.session.username, 'password_hash': req.session.password});
+  } else {
+    res.redirect('/')
+  }
 });
 
+//changing account info
 app.get('/update_login', async (req, res) => {
   if (req.session.username) {
     let hashed = await hash(req.query.password)
@@ -225,7 +232,6 @@ app.get('/update_login', async (req, res) => {
   } else {
     res.sendStatus(401);
   }
-
 });
 
 app.listen(3000, async () => {
